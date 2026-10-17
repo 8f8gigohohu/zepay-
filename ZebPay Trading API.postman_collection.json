@@ -1,0 +1,2652 @@
+{
+  "info": {
+    "_postman_id": "4fb9d867-073a-4e0c-8037-0f303d0c29db",
+    "name": "ZebPay Trading API",
+    "description": "# ZebPay Trading API\n\nComplete collection for Spot and Futures trading on ZebPay exchange.\n\n## Base URLs\n- **Spot:** https://sapi.zebpay.com\n- **Futures:** https://futuresbe.zebpay.com\n\n## Getting Started\n1. Get your API Key & Secret: Log in to ZebPay → API Trading → Create New API Key\n2. Set `apiKey` and `apiSecret` in collection variables\n3. For public endpoints (Market Data), no auth is needed\n4. For private endpoints, use either API Key headers or Bearer token from Login flow\n\n## Auth Headers (API Key method)\n- `x-auth-apikey`: Your API Key\n- `x-auth-signature`: HMAC-SHA256 signature\n\n## Reference\nFull docs: https://apidocs.zebpay.com",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "59021735",
+    "_collection_link": "https://go.postman.co/collection/59021735-4fb9d867-073a-4e0c-8037-0f303d0c29db?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "})",
+                  "",
+                  "pm.test('Response has success status', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('success');",
+                  "})",
+                  "",
+                  "pm.test('Response contains token', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('token');",
+                  "    pm.expect(json.token).to.be.a('string').and.not.empty;",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"your@email.com\",\n  \"password\": \"yourpassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "login"
+              ]
+            },
+            "description": "Authenticate with your ZebPay account credentials. Returns a temporary token used for OTP verification.\n\n**Body Parameters:**\n- `email` (string, required): Your registered ZebPay email\n- `password` (string, required): Your account password\n\n**Next Step:** Use the returned `token` in the Verify OTP request."
+          },
+          "response": [
+            {
+              "name": "Success - Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\": \"user@example.com\", \"password\": \"yourpassword\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "enabled": true
+                }
+              ],
+              "cookie": [],
+              "body": "{\"status\": \"success\", \"message\": \"OTP sent to registered mobile and email\", \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c3JfMTIzNDU2IiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIiwiaWF0IjoxNjk4MjM0NTY3fQ.abc123\"}"
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "})",
+                  "",
+                  "pm.test('OTP verified successfully', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('success');",
+                  "})",
+                  "",
+                  "pm.test('Response contains token for PIN step', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('token');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"123456\",\n  \"token\": \"{{accessToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/verifyotp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "verifyotp"
+              ]
+            },
+            "description": "Verify the OTP sent to your registered mobile/email. Returns a PIN verification token.\n\n**Body Parameters:**\n- `otp` (string, required): 6-digit OTP received on your mobile/email\n- `token` (string, required): Token received from the Login response\n\n**Next Step:** Use the returned `token` in the Verify PIN request."
+          },
+          "response": [
+            {
+              "name": "Success - OTP Verified",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"otp\": \"123456\", \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/verify-otp",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "verify-otp"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "enabled": true
+                }
+              ],
+              "cookie": [],
+              "body": "{\"status\": \"success\", \"message\": \"OTP verified successfully\", \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c3JfMTIzNDU2Iiwic3RlcCI6Im90cF92ZXJpZmllZCIsImlhdCI6MTY5ODIzNDYwMH0.def456\"}"
+            }
+          ]
+        },
+        {
+          "name": "Verify PIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "})",
+                  "",
+                  "pm.test('Authentication successful', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('success');",
+                  "})",
+                  "",
+                  "pm.test('Access token returned', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('accessToken');",
+                  "    pm.expect(json.accessToken).to.be.a('string').and.not.empty;",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pin\": \"1234\",\n  \"token\": \"{{accessToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/verifypin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "verifypin"
+              ]
+            },
+            "description": "Verify your trading PIN to complete authentication. Returns the final `accessToken` for all private API calls.\n\n**Body Parameters:**\n- `pin` (string, required): Your 4-6 digit trading PIN\n- `token` (string, required): Token received from Verify OTP\n\n**Important:** Save the returned `accessToken` to the `{{accessToken}}` collection variable."
+          },
+          "response": [
+            {
+              "name": "Success - PIN Verified, Access Token Returned",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"pin\": \"1234\", \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/verify-pin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "verify-pin"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "enabled": true
+                }
+              ],
+              "cookie": [],
+              "body": "{\"status\": \"success\", \"message\": \"Authentication successful\", \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c3JfMTIzNDU2IiwicGVybWlzc2lvbnMiOlsidHJhZGluZyIsInJlYWQiXSwiaWF0IjoxNjk4MjM0NjUwLCJleHAiOjE2OTgzMjEwNTB9.ghi789\", \"expiresIn\": 86400}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📈 Spot Trading",
+      "item": [
+        {
+          "name": "Market Data (Public)",
+          "item": [
+            {
+              "name": "Get All Tickers",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Response time is under 2000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                      "})",
+                      "",
+                      "pm.test('Response has data array', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('data');",
+                      "    pm.expect(json.data).to.be.an('array').and.not.empty;",
+                      "})",
+                      "",
+                      "pm.test('Each ticker has required fields', function () {",
+                      "    const json = pm.response.json();",
+                      "    json.data.forEach(ticker => {",
+                      "        pm.expect(ticker).to.have.property('symbol');",
+                      "        pm.expect(ticker).to.have.property('lastPrice');",
+                      "        pm.expect(ticker).to.have.property('high24h');",
+                      "        pm.expect(ticker).to.have.property('low24h');",
+                      "        pm.expect(ticker).to.have.property('volume24h');",
+                      "    });",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/market",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "market"
+                  ]
+                },
+                "description": "Fetch real-time market data for all available spot trading pairs on ZebPay.\n\n**No authentication required.**\n\nReturns price, 24h high/low, volume, and percentage change for every active trading pair."
+              },
+              "response": [
+                {
+                  "name": "Success - All Tickers",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/tickers",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "tickers"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": [{\"symbol\": \"BTC-INR\", \"lastPrice\": \"5234567.00\", \"high24h\": \"5312000.00\", \"low24h\": \"5150000.00\", \"volume24h\": \"12.4521\", \"change24h\": \"1.85\", \"bid\": \"5234000.00\", \"ask\": \"5235000.00\"}, {\"symbol\": \"ETH-INR\", \"lastPrice\": \"278450.00\", \"high24h\": \"285000.00\", \"low24h\": \"271000.00\", \"volume24h\": \"145.8900\", \"change24h\": \"-0.72\", \"bid\": \"278400.00\", \"ask\": \"278500.00\"}, {\"symbol\": \"USDT-INR\", \"lastPrice\": \"84.25\", \"high24h\": \"84.50\", \"low24h\": \"83.90\", \"volume24h\": \"98234.00\", \"change24h\": \"0.12\", \"bid\": \"84.20\", \"ask\": \"84.30\"}]}"
+                }
+              ]
+            },
+            {
+              "name": "Get Ticker",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Ticker data is present', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('data');",
+                      "    pm.expect(json.data).to.be.an('object');",
+                      "})",
+                      "",
+                      "pm.test('Ticker has valid price fields', function () {",
+                      "    const json = pm.response.json();",
+                      "    const data = json.data;",
+                      "    pm.expect(data).to.have.property('lastPrice');",
+                      "    pm.expect(data).to.have.property('bid');",
+                      "    pm.expect(data).to.have.property('ask');",
+                      "    pm.expect(parseFloat(data.ask)).to.be.above(parseFloat(data.bid));",
+                      "})",
+                      "",
+                      "pm.test('Symbol matches requested pair', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.symbol).to.eql(pm.collectionVariables.get('symbol') || 'BTC-INR');",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/market/{{symbol}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "market",
+                    "{{symbol}}"
+                  ]
+                },
+                "description": "Fetch real-time market data for a specific trading pair.\n\n**No authentication required.**\n\n**Path Parameter:**\n- `symbol` (string): Trading pair e.g. `BTC-INR`, `ETH-INR`, `SOL-INR`\n\nReturns current price, 24h stats, and bid/ask spread."
+              },
+              "response": [
+                {
+                  "name": "Success - BTC-INR Ticker",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/ticker/BTC-INR",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "ticker",
+                        "BTC-INR"
+                      ],
+                      "variable": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"symbol\": \"BTC-INR\", \"lastPrice\": \"5234567.00\", \"high24h\": \"5312000.00\", \"low24h\": \"5150000.00\", \"volume24h\": \"12.4521\", \"change24h\": \"1.85\", \"changeAmount24h\": \"94567.00\", \"bid\": \"5234000.00\", \"ask\": \"5235000.00\", \"timestamp\": \"2026-10-17T08:00:00.000Z\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Get Order Book",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Order book has bids and asks', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.have.property('bids');",
+                      "    pm.expect(json.data).to.have.property('asks');",
+                      "    pm.expect(json.data.bids).to.be.an('array').and.not.empty;",
+                      "    pm.expect(json.data.asks).to.be.an('array').and.not.empty;",
+                      "})",
+                      "",
+                      "pm.test('Best ask is higher than best bid', function () {",
+                      "    const json = pm.response.json();",
+                      "    const bestBid = parseFloat(json.data.bids[0][0]);",
+                      "    const bestAsk = parseFloat(json.data.asks[0][0]);",
+                      "    pm.expect(bestAsk).to.be.above(bestBid);",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/market/{{symbol}}/orderbook",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "market",
+                    "{{symbol}}",
+                    "orderbook"
+                  ]
+                },
+                "description": "Fetch the live order book (market depth) for a trading pair showing all pending buy (bid) and sell (ask) orders.\n\n**No authentication required.**\n\n**Path Parameter:**\n- `symbol` (string): Trading pair e.g. `BTC-INR`\n\nEach entry shows `[price, quantity]`."
+              },
+              "response": [
+                {
+                  "name": "Success - BTC-INR Order Book",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/orderbook/BTC-INR",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "orderbook",
+                        "BTC-INR"
+                      ],
+                      "variable": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"symbol\": \"BTC-INR\", \"timestamp\": \"2026-10-17T08:00:00.000Z\", \"bids\": [[\"5234000.00\", \"0.0512\"], [\"5233500.00\", \"0.1200\"], [\"5233000.00\", \"0.2500\"], [\"5232000.00\", \"0.5000\"], [\"5230000.00\", \"1.0000\"]], \"asks\": [[\"5235000.00\", \"0.0300\"], [\"5235500.00\", \"0.0800\"], [\"5236000.00\", \"0.1500\"], [\"5237000.00\", \"0.3000\"], [\"5240000.00\", \"0.7500\"]]}}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Account",
+          "item": [
+            {
+              "name": "Get Spot Balance",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Balance data is an array', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.be.an('array');",
+                      "})",
+                      "",
+                      "pm.test('Each balance has required fields', function () {",
+                      "    const json = pm.response.json();",
+                      "    json.data.forEach(balance => {",
+                      "        pm.expect(balance).to.have.property('asset');",
+                      "        pm.expect(balance).to.have.property('total');",
+                      "        pm.expect(balance).to.have.property('free');",
+                      "        pm.expect(balance).to.have.property('locked');",
+                      "    });",
+                      "})",
+                      "",
+                      "pm.test('Free balance does not exceed total', function () {",
+                      "    const json = pm.response.json();",
+                      "    json.data.forEach(balance => {",
+                      "        pm.expect(parseFloat(balance.free)).to.be.at.most(parseFloat(balance.total));",
+                      "    });",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/wallet/balances",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "wallet",
+                    "balances"
+                  ]
+                },
+                "description": "Retrieve your current spot wallet balances for all assets.\n\n**Authentication required** — include `x-auth-apikey` and `x-auth-signature` headers, or `Authorization: Bearer {{accessToken}}`.\n\nReturns total, available (free), and locked balances for each asset."
+              },
+              "response": [
+                {
+                  "name": "Success - Wallet Balances",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/balance",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "balance"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": [{\"asset\": \"INR\", \"total\": \"250000.00\", \"free\": \"180000.00\", \"locked\": \"70000.00\"}, {\"asset\": \"BTC\", \"total\": \"0.05230000\", \"free\": \"0.04730000\", \"locked\": \"0.00500000\"}, {\"asset\": \"ETH\", \"total\": \"1.25000000\", \"free\": \"1.25000000\", \"locked\": \"0.00000000\"}, {\"asset\": \"USDT\", \"total\": \"5000.00\", \"free\": \"5000.00\", \"locked\": \"0.00\"}]}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Orders",
+          "item": [
+            {
+              "name": "Place Spot Buy Order",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Order placed successfully', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.status).to.eql('success');",
+                      "})",
+                      "",
+                      "pm.test('Order has required fields', function () {",
+                      "    const json = pm.response.json();",
+                      "    const order = json.data;",
+                      "    pm.expect(order).to.have.property('orderId');",
+                      "    pm.expect(order).to.have.property('symbol');",
+                      "    pm.expect(order).to.have.property('side');",
+                      "    pm.expect(order).to.have.property('status');",
+                      "})",
+                      "",
+                      "pm.test('Order side is BUY', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.side).to.eql('BUY');",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"symbol\": \"{{symbol}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": \"5000000\",\n  \"quantity\": \"0.001\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ]
+                },
+                "description": "Place a limit BUY order on the spot market.\n\n**Authentication required.**\n\n**Body Parameters:**\n- `symbol` (string, required): Trading pair e.g. `BTC-INR`\n- `side` (string): `BUY`\n- `type` (string): `LIMIT` or `MARKET`\n- `price` (string, required for LIMIT): Price in INR\n- `quantity` (string, required): Amount of crypto to buy\n\n**Tip:** Save the returned `orderId` to `{{orderId}}` for cancellation."
+              },
+              "response": [
+                {
+                  "name": "Success - Buy Order Placed",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"LIMIT\", \"price\": \"5000000.00\", \"quantity\": \"0.001\"}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/order",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "order"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json",
+                      "description": "",
+                      "enabled": true
+                    },
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"orderId\": \"ORD-BTC-20261017-001234\", \"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"LIMIT\", \"price\": \"5000000.00\", \"quantity\": \"0.001\", \"status\": \"OPEN\", \"filledQuantity\": \"0.000\", \"createdAt\": \"2026-10-17T08:00:00.000Z\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Place Spot Sell Order",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Sell order placed successfully', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.status).to.eql('success');",
+                      "})",
+                      "",
+                      "pm.test('Order side is SELL', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.side).to.eql('SELL');",
+                      "})",
+                      "",
+                      "pm.test('Order status is OPEN', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.status).to.eql('OPEN');",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"symbol\": \"{{symbol}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": \"5500000\",\n  \"quantity\": \"0.001\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ]
+                },
+                "description": "Place a limit SELL order on the spot market.\n\n**Authentication required.**\n\n**Body Parameters:**\n- `symbol` (string, required): Trading pair e.g. `BTC-INR`\n- `side` (string): `SELL`\n- `type` (string): `LIMIT` or `MARKET`\n- `price` (string, required for LIMIT): Price in INR\n- `quantity` (string, required): Amount of crypto to sell\n\n**Note:** Ensure you have sufficient balance before placing a sell order."
+              },
+              "response": [
+                {
+                  "name": "Success - Sell Order Placed",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"symbol\": \"BTC-INR\", \"side\": \"SELL\", \"type\": \"LIMIT\", \"price\": \"5500000.00\", \"quantity\": \"0.001\"}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/order",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "order"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json",
+                      "description": "",
+                      "enabled": true
+                    },
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"orderId\": \"ORD-BTC-20261017-001235\", \"symbol\": \"BTC-INR\", \"side\": \"SELL\", \"type\": \"LIMIT\", \"price\": \"5500000.00\", \"quantity\": \"0.001\", \"status\": \"OPEN\", \"filledQuantity\": \"0.000\", \"createdAt\": \"2026-10-17T08:00:05.000Z\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Place Market Buy Order",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"symbol\": \"{{symbol}}\",\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"quantity\": \"0.001\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ]
+                },
+                "description": "Place a MARKET BUY order — executes immediately at the best available price.\n\n**Authentication required.**\n\n**Body Parameters:**\n- `symbol` (string, required): Trading pair\n- `side` (string): `BUY`\n- `type` (string): `MARKET`\n- `quantity` (string, required): Amount of crypto to buy\n\n**Warning:** Market orders execute instantly at current market price. No price guarantee."
+              },
+              "response": [
+                {
+                  "name": "Success - Market Buy Executed",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"MARKET\", \"quantity\": \"0.001\"}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/order",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "order"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json",
+                      "description": "",
+                      "enabled": true
+                    },
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"orderId\": \"ORD-BTC-20261017-001236\", \"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"MARKET\", \"executedPrice\": \"5235100.00\", \"quantity\": \"0.001\", \"status\": \"COMPLETED\", \"filledQuantity\": \"0.001\", \"totalValue\": \"5235.10\", \"createdAt\": \"2026-10-17T08:00:10.000Z\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Get Open Orders",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Returns array of orders', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.be.an('array');",
+                      "})",
+                      "",
+                      "pm.test('All returned orders are OPEN', function () {",
+                      "    const json = pm.response.json();",
+                      "    json.data.forEach(order => {",
+                      "        pm.expect(order.status).to.eql('OPEN');",
+                      "    });",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders?symbol={{symbol}}&status=OPEN",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ],
+                  "query": [
+                    {
+                      "key": "symbol",
+                      "value": "{{symbol}}"
+                    },
+                    {
+                      "key": "status",
+                      "value": "OPEN"
+                    }
+                  ]
+                },
+                "description": "Retrieve all currently open (pending) orders for a trading pair.\n\n**Authentication required.**\n\n**Query Parameters:**\n- `symbol` (string): Trading pair e.g. `BTC-INR`\n- `status` (string): `OPEN`"
+              },
+              "response": [
+                {
+                  "name": "Success - Open Orders List",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/orders?symbol=BTC-INR&status=OPEN",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "orders"
+                      ],
+                      "query": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR",
+                          "type": "text"
+                        },
+                        {
+                          "key": "status",
+                          "value": "OPEN",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": [{\"orderId\": \"ORD-BTC-20261017-001234\", \"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"LIMIT\", \"price\": \"5000000.00\", \"quantity\": \"0.001\", \"filledQuantity\": \"0.000\", \"status\": \"OPEN\", \"createdAt\": \"2026-10-17T08:00:00.000Z\"}, {\"orderId\": \"ORD-BTC-20261017-001235\", \"symbol\": \"BTC-INR\", \"side\": \"SELL\", \"type\": \"LIMIT\", \"price\": \"5500000.00\", \"quantity\": \"0.001\", \"filledQuantity\": \"0.000\", \"status\": \"OPEN\", \"createdAt\": \"2026-10-17T08:00:05.000Z\"}]}"
+                }
+              ]
+            },
+            {
+              "name": "Cancel Spot Order",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Cancellation successful', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.status).to.eql('success');",
+                      "})",
+                      "",
+                      "pm.test('Order status is CANCELLED', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.status).to.eql('CANCELLED');",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders",
+                    "{{orderId}}"
+                  ]
+                },
+                "description": "Cancel an open spot order by its order ID.\n\n**Authentication required.**\n\n**Path Parameter:**\n- `orderId` (string): The order ID to cancel (set `{{orderId}}` variable)\n\n**Note:** Only OPEN orders can be cancelled. Already filled or completed orders cannot be cancelled."
+              },
+              "response": [
+                {
+                  "name": "Success - Order Cancelled",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/order/{{orderId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "order",
+                        "{{orderId}}"
+                      ],
+                      "variable": [
+                        {
+                          "key": "orderId",
+                          "value": "ORD-BTC-20261017-001234"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"message\": \"Order cancelled successfully\", \"data\": {\"orderId\": \"ORD-BTC-20261017-001234\", \"symbol\": \"BTC-INR\", \"status\": \"CANCELLED\", \"cancelledAt\": \"2026-10-17T08:05:00.000Z\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Get Order History",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders?symbol={{symbol}}&status=COMPLETED",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ],
+                  "query": [
+                    {
+                      "key": "symbol",
+                      "value": "{{symbol}}"
+                    },
+                    {
+                      "key": "status",
+                      "value": "COMPLETED"
+                    }
+                  ]
+                },
+                "description": "Retrieve completed/historical orders for a trading pair.\n\n**Authentication required.**\n\n**Query Parameters:**\n- `symbol` (string): Trading pair\n- `status` (string): `COMPLETED`, `CANCELLED`, or `ALL`"
+              },
+              "response": [
+                {
+                  "name": "Success - Order History",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/spot/orders/history?symbol=BTC-INR&status=COMPLETED",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "spot",
+                        "orders",
+                        "history"
+                      ],
+                      "query": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR",
+                          "type": "text"
+                        },
+                        {
+                          "key": "status",
+                          "value": "COMPLETED",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": [{\"orderId\": \"ORD-BTC-20261017-001236\", \"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"MARKET\", \"executedPrice\": \"5235100.00\", \"quantity\": \"0.001\", \"status\": \"COMPLETED\", \"filledQuantity\": \"0.001\", \"fee\": \"5.24\", \"createdAt\": \"2026-10-17T08:00:10.000Z\", \"completedAt\": \"2026-10-17T08:00:10.500Z\"}]}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🚀 Futures Trading",
+      "item": [
+        {
+          "name": "Market Data (Public)",
+          "item": [
+            {
+              "name": "Get Futures Tickers",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Futures tickers array returned', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.be.an('array').and.not.empty;",
+                      "})",
+                      "",
+                      "pm.test('Each futures ticker has mark price and funding rate', function () {",
+                      "    const json = pm.response.json();",
+                      "    json.data.forEach(ticker => {",
+                      "        pm.expect(ticker).to.have.property('markPrice');",
+                      "        pm.expect(ticker).to.have.property('fundingRate');",
+                      "        pm.expect(ticker).to.have.property('openInterest');",
+                      "    });",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/market",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "market"
+                  ]
+                },
+                "description": "Fetch real-time market data for all available futures/perpetual contracts.\n\n**No authentication required.**\n\nReturns mark price, index price, funding rate, and 24h stats for all futures pairs."
+              },
+              "response": [
+                {
+                  "name": "Success - All Futures Tickers",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/tickers",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "tickers"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": [{\"symbol\": \"BTC-INR\", \"markPrice\": \"5236000.00\", \"indexPrice\": \"5234567.00\", \"lastPrice\": \"5235500.00\", \"high24h\": \"5315000.00\", \"low24h\": \"5148000.00\", \"volume24h\": \"45.2100\", \"change24h\": \"1.92\", \"fundingRate\": \"0.0001\", \"nextFundingTime\": \"2026-10-17T16:00:00.000Z\", \"openInterest\": \"125.4500\"}, {\"symbol\": \"ETH-INR\", \"markPrice\": \"279000.00\", \"indexPrice\": \"278450.00\", \"lastPrice\": \"278900.00\", \"high24h\": \"286000.00\", \"low24h\": \"270500.00\", \"volume24h\": \"520.8800\", \"change24h\": \"-0.68\", \"fundingRate\": \"0.0002\", \"nextFundingTime\": \"2026-10-17T16:00:00.000Z\", \"openInterest\": \"890.2300\"}]}"
+                }
+              ]
+            },
+            {
+              "name": "Get Futures Ticker",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/market/{{symbol}}",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "market",
+                    "{{symbol}}"
+                  ]
+                },
+                "description": "Fetch real-time data for a specific futures/perpetual contract.\n\n**No authentication required.**\n\n**Path Parameter:**\n- `symbol` (string): Futures pair e.g. `BTC-INR`"
+              },
+              "response": [
+                {
+                  "name": "Success - BTC-INR Futures Ticker",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/ticker/BTC-INR",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "ticker",
+                        "BTC-INR"
+                      ],
+                      "variable": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"symbol\": \"BTC-INR\", \"markPrice\": \"5236000.00\", \"indexPrice\": \"5234567.00\", \"lastPrice\": \"5235500.00\", \"high24h\": \"5315000.00\", \"low24h\": \"5148000.00\", \"volume24h\": \"45.2100\", \"change24h\": \"1.92\", \"fundingRate\": \"0.0001\", \"nextFundingTime\": \"2026-10-17T16:00:00.000Z\", \"openInterest\": \"125.4500\", \"timestamp\": \"2026-10-17T08:00:00.000Z\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Get Futures Order Book",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/market/{{symbol}}/orderbook",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "market",
+                    "{{symbol}}",
+                    "orderbook"
+                  ]
+                },
+                "description": "Fetch the live order book for a futures contract.\n\n**No authentication required.**\n\n**Path Parameter:**\n- `symbol` (string): Futures pair e.g. `BTC-INR`"
+              },
+              "response": [
+                {
+                  "name": "Success - Futures Order Book",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/orderbook/BTC-INR",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "orderbook",
+                        "BTC-INR"
+                      ],
+                      "variable": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"symbol\": \"BTC-INR\", \"timestamp\": \"2026-10-17T08:00:00.000Z\", \"bids\": [[\"5235000.00\", \"0.5000\"], [\"5234500.00\", \"1.2000\"], [\"5234000.00\", \"2.5000\"]], \"asks\": [[\"5236000.00\", \"0.3000\"], [\"5236500.00\", \"0.9000\"], [\"5237000.00\", \"1.8000\"]]}}"
+                }
+              ]
+            },
+            {
+              "name": "Get Funding Rate",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/market/{{symbol}}/fundingrate",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "market",
+                    "{{symbol}}",
+                    "fundingrate"
+                  ]
+                },
+                "description": "Get the current and historical funding rates for a perpetual futures contract.\n\n**No authentication required.**\n\nFunding rates are exchanged between long and short position holders every 8 hours. Positive rate = longs pay shorts. Negative rate = shorts pay longs."
+              },
+              "response": [
+                {
+                  "name": "Success - Funding Rate",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/funding-rate/BTC-INR",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "funding-rate",
+                        "BTC-INR"
+                      ],
+                      "variable": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"symbol\": \"BTC-INR\", \"currentFundingRate\": \"0.0001\", \"nextFundingRate\": \"0.00008\", \"nextFundingTime\": \"2026-10-17T16:00:00.000Z\", \"countdown\": \"28800\", \"history\": [{\"rate\": \"0.0001\", \"timestamp\": \"2026-10-17T08:00:00.000Z\"}, {\"rate\": \"0.00012\", \"timestamp\": \"2026-10-17T00:00:00.000Z\"}, {\"rate\": \"0.00009\", \"timestamp\": \"2026-10-16T16:00:00.000Z\"}]}}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Account & Positions",
+          "item": [
+            {
+              "name": "Get Futures Balance",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/wallet/balances",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "wallet",
+                    "balances"
+                  ]
+                },
+                "description": "Retrieve your futures wallet/margin balance.\n\n**Authentication required.**\n\nShows total equity, available margin, used margin, unrealized PnL, and realized PnL."
+              },
+              "response": [
+                {
+                  "name": "Success - Futures Balance",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/balance",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "balance"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"asset\": \"INR\", \"totalEquity\": \"100000.00\", \"availableMargin\": \"75000.00\", \"usedMargin\": \"25000.00\", \"unrealizedPnL\": \"1250.00\", \"realizedPnL\": \"3400.00\", \"marginRatio\": \"25.00\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Get Open Positions",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Positions data is an array', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.be.an('array');",
+                      "})",
+                      "",
+                      "pm.test('Each position has PnL and liquidation price', function () {",
+                      "    const json = pm.response.json();",
+                      "    json.data.forEach(pos => {",
+                      "        pm.expect(pos).to.have.property('unrealizedPnL');",
+                      "        pm.expect(pos).to.have.property('liquidationPrice');",
+                      "        pm.expect(pos).to.have.property('leverage');",
+                      "    });",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/positions?symbol={{symbol}}",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "positions"
+                  ],
+                  "query": [
+                    {
+                      "key": "symbol",
+                      "value": "{{symbol}}"
+                    }
+                  ]
+                },
+                "description": "Retrieve all your currently open futures positions.\n\n**Authentication required.**\n\n**Query Parameter:**\n- `symbol` (string, optional): Filter by trading pair\n\nShows entry price, mark price, PnL, leverage, and liquidation price."
+              },
+              "response": [
+                {
+                  "name": "Success - Open Positions",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/positions?symbol=BTC-INR",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "positions"
+                      ],
+                      "query": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": [{\"positionId\": \"POS-BTC-20261017-001\", \"symbol\": \"BTC-INR\", \"side\": \"LONG\", \"entryPrice\": \"5200000.00\", \"markPrice\": \"5236000.00\", \"quantity\": \"0.01\", \"leverage\": 10, \"margin\": \"52000.00\", \"unrealizedPnL\": \"3600.00\", \"unrealizedPnLPercent\": \"6.92\", \"liquidationPrice\": \"4750000.00\", \"createdAt\": \"2026-10-17T06:00:00.000Z\"}]}"
+                }
+              ]
+            },
+            {
+              "name": "Get Leverage",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/leverage?symbol={{symbol}}",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "leverage"
+                  ],
+                  "query": [
+                    {
+                      "key": "symbol",
+                      "value": "{{symbol}}"
+                    }
+                  ]
+                },
+                "description": "Get the current leverage setting for a futures trading pair.\n\n**Authentication required.**\n\n**Query Parameter:**\n- `symbol` (string): Futures pair e.g. `BTC-INR`\n\nZebPay supports up to 50x leverage on futures contracts."
+              },
+              "response": [
+                {
+                  "name": "Success - Get Leverage",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/leverage?symbol=BTC-INR",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "leverage"
+                      ],
+                      "query": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"symbol\": \"BTC-INR\", \"leverage\": 10, \"maxLeverage\": 50, \"marginType\": \"ISOLATED\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Set Leverage",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"symbol\": \"{{symbol}}\",\n  \"leverage\": 10\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/leverage",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "leverage"
+                  ]
+                },
+                "description": "Set the leverage multiplier for a futures trading pair.\n\n**Authentication required.**\n\n**Body Parameters:**\n- `symbol` (string, required): Futures pair\n- `leverage` (integer, required): Leverage value (1–50)\n\n**Warning:** Higher leverage increases both potential profit and risk of liquidation."
+              },
+              "response": [
+                {
+                  "name": "Success - Leverage Set to 10x",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"symbol\": \"BTC-INR\", \"leverage\": 10}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/leverage",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "leverage"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json",
+                      "description": "",
+                      "enabled": true
+                    },
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"message\": \"Leverage updated successfully\", \"data\": {\"symbol\": \"BTC-INR\", \"leverage\": 10, \"effectiveFrom\": \"2026-10-17T08:00:00.000Z\"}}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Orders",
+          "item": [
+            {
+              "name": "Place Futures Long (Buy)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Futures long order placed', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.status).to.eql('success');",
+                      "})",
+                      "",
+                      "pm.test('Order has leverage field', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.have.property('leverage');",
+                      "    pm.expect(json.data.leverage).to.be.a('number').and.above(0);",
+                      "})",
+                      "",
+                      "pm.test('Order side is BUY', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.side).to.eql('BUY');",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"symbol\": \"{{symbol}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": \"5000000\",\n  \"quantity\": \"0.001\",\n  \"leverage\": 10\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/orders",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ]
+                },
+                "description": "Open a LONG (buy) futures position — profit when price goes UP.\n\n**Authentication required.**\n\n**Body Parameters:**\n- `symbol` (string): Futures pair\n- `side` (string): `BUY`\n- `type` (string): `LIMIT` or `MARKET`\n- `price` (string): Entry price (for LIMIT orders)\n- `quantity` (string): Contract size\n- `leverage` (integer): Leverage multiplier (1–50)\n\n**Tip:** Set a stop-loss to manage risk."
+              },
+              "response": [
+                {
+                  "name": "Success - Long Position Opened",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"LIMIT\", \"price\": \"5000000.00\", \"quantity\": \"0.001\", \"leverage\": 10}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/order",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "order"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json",
+                      "description": "",
+                      "enabled": true
+                    },
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"orderId\": \"FORD-BTC-20261017-002001\", \"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"LIMIT\", \"price\": \"5000000.00\", \"quantity\": \"0.001\", \"leverage\": 10, \"margin\": \"5000.00\", \"status\": \"OPEN\", \"createdAt\": \"2026-10-17T08:00:00.000Z\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Place Futures Short (Sell)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"symbol\": \"{{symbol}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": \"5500000\",\n  \"quantity\": \"0.001\",\n  \"leverage\": 10\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/orders",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ]
+                },
+                "description": "Open a SHORT (sell) futures position — profit when price goes DOWN.\n\n**Authentication required.**\n\n**Body Parameters:**\n- `symbol` (string): Futures pair\n- `side` (string): `SELL`\n- `type` (string): `LIMIT` or `MARKET`\n- `price` (string): Entry price (for LIMIT orders)\n- `quantity` (string): Contract size\n- `leverage` (integer): Leverage multiplier (1–50)\n\n**Warning:** Shorting with high leverage carries significant liquidation risk."
+              },
+              "response": [
+                {
+                  "name": "Success - Short Position Opened",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"symbol\": \"BTC-INR\", \"side\": \"SELL\", \"type\": \"LIMIT\", \"price\": \"5500000.00\", \"quantity\": \"0.001\", \"leverage\": 10}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/order",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "order"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json",
+                      "description": "",
+                      "enabled": true
+                    },
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": {\"orderId\": \"FORD-BTC-20261017-002002\", \"symbol\": \"BTC-INR\", \"side\": \"SELL\", \"type\": \"LIMIT\", \"price\": \"5500000.00\", \"quantity\": \"0.001\", \"leverage\": 10, \"margin\": \"5500.00\", \"status\": \"OPEN\", \"createdAt\": \"2026-10-17T08:00:05.000Z\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Close Position",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "})",
+                      "",
+                      "pm.test('Position closed successfully', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.status).to.eql('success');",
+                      "})",
+                      "",
+                      "pm.test('Realized PnL is returned', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.have.property('realizedPnL');",
+                      "    pm.expect(json.data).to.have.property('netPnL');",
+                      "})"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"symbol\": \"{{symbol}}\",\n  \"side\": \"SELL\",\n  \"type\": \"MARKET\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/positions/close",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "positions",
+                    "close"
+                  ]
+                },
+                "description": "Close an open futures position at market price.\n\n**Authentication required.**\n\n**Body Parameters:**\n- `symbol` (string): Futures pair\n- `side` (string): Opposite of your position (`SELL` to close a LONG, `BUY` to close a SHORT)\n- `type` (string): `MARKET`\n\nReturns realized PnL after closing."
+              },
+              "response": [
+                {
+                  "name": "Success - Position Closed",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"symbol\": \"BTC-INR\", \"side\": \"SELL\", \"type\": \"MARKET\"}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/order/close",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "order",
+                        "close"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json",
+                      "description": "",
+                      "enabled": true
+                    },
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"message\": \"Position closed successfully\", \"data\": {\"positionId\": \"POS-BTC-20261017-001\", \"symbol\": \"BTC-INR\", \"closedAt\": \"2026-10-17T09:00:00.000Z\", \"closePrice\": \"5236000.00\", \"realizedPnL\": \"3600.00\", \"fee\": \"52.36\", \"netPnL\": \"3547.64\"}}"
+                }
+              ]
+            },
+            {
+              "name": "Get Futures Open Orders",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/orders?symbol={{symbol}}&status=OPEN",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ],
+                  "query": [
+                    {
+                      "key": "symbol",
+                      "value": "{{symbol}}"
+                    },
+                    {
+                      "key": "status",
+                      "value": "OPEN"
+                    }
+                  ]
+                },
+                "description": "Retrieve all open futures orders for a trading pair.\n\n**Authentication required.**\n\n**Query Parameters:**\n- `symbol` (string): Futures pair\n- `status` (string): `OPEN`"
+              },
+              "response": [
+                {
+                  "name": "Success - Futures Open Orders",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/orders?symbol=BTC-INR&status=OPEN",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "orders"
+                      ],
+                      "query": [
+                        {
+                          "key": "symbol",
+                          "value": "BTC-INR",
+                          "type": "text"
+                        },
+                        {
+                          "key": "status",
+                          "value": "OPEN",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"data\": [{\"orderId\": \"FORD-BTC-20261017-002001\", \"symbol\": \"BTC-INR\", \"side\": \"BUY\", \"type\": \"LIMIT\", \"price\": \"5000000.00\", \"quantity\": \"0.001\", \"leverage\": 10, \"filledQuantity\": \"0.000\", \"status\": \"OPEN\", \"createdAt\": \"2026-10-17T08:00:00.000Z\"}]}"
+                }
+              ]
+            },
+            {
+              "name": "Cancel Futures Order",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "x-auth-apikey",
+                    "value": "{{apiKey}}"
+                  },
+                  {
+                    "key": "x-auth-signature",
+                    "value": "{{signature}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{futuresBaseUrl}}/api/v1/orders/{{orderId}}",
+                  "host": [
+                    "{{futuresBaseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders",
+                    "{{orderId}}"
+                  ]
+                },
+                "description": "Cancel an open futures order by its order ID.\n\n**Authentication required.**\n\n**Path Parameter:**\n- `orderId` (string): The futures order ID to cancel\n\n**Note:** Only OPEN orders can be cancelled."
+              },
+              "response": [
+                {
+                  "name": "Success - Futures Order Cancelled",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{accessToken}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": ""
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/futures/order/{{orderId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "futures",
+                        "order",
+                        "{{orderId}}"
+                      ],
+                      "variable": [
+                        {
+                          "key": "orderId",
+                          "value": "FORD-BTC-20261017-002001"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Authorization",
+                      "value": "Bearer {{accessToken}}",
+                      "description": "",
+                      "enabled": true
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\"status\": \"success\", \"message\": \"Futures order cancelled successfully\", \"data\": {\"orderId\": \"FORD-BTC-20261017-002001\", \"symbol\": \"BTC-INR\", \"status\": \"CANCELLED\", \"cancelledAt\": \"2026-10-17T08:10:00.000Z\"}}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// ZebPay API - Auto-generate auth headers for private endpoints",
+          "const apiKey = pm.collectionVariables.get(\"apiKey\");",
+          "const apiSecret = pm.collectionVariables.get(\"apiSecret\");",
+          "",
+          "// Only compute signature if apiKey and apiSecret are set",
+          "if (apiKey && apiSecret) {",
+          "    const timestamp = Date.now().toString();",
+          "    pm.collectionVariables.set(\"timestamp\", timestamp);",
+          "",
+          "    // Get request details for signature",
+          "    const method = pm.request.method.toUpperCase();",
+          "    const url = pm.request.url.toString();",
+          "    ",
+          "    // Extract path from URL",
+          "    let path = \"\";",
+          "    try {",
+          "        const urlObj = new URL(url);",
+          "        path = urlObj.pathname + urlObj.search;",
+          "    } catch(e) {",
+          "        path = url;",
+          "    }",
+          "",
+          "    // Get request body if present",
+          "    let body = \"\";",
+          "    if (pm.request.body && pm.request.body.raw) {",
+          "        body = pm.request.body.raw;",
+          "    }",
+          "",
+          "    // Build the signature string: timestamp + method + path + body",
+          "    const signatureString = timestamp + method + path + body;",
+          "",
+          "    // Compute HMAC-SHA256 signature",
+          "    const signature = CryptoJS.HmacSHA256(signatureString, apiSecret).toString(CryptoJS.enc.Hex);",
+          "    ",
+          "    pm.collectionVariables.set(\"signature\", signature);",
+          "    ",
+          "    console.log(\"Auth headers generated:\");",
+          "    console.log(\"Timestamp:\", timestamp);",
+          "    console.log(\"Signature string:\", signatureString);",
+          "    console.log(\"Signature:\", signature);",
+          "} else {",
+          "    console.log(\"ℹ️ apiKey or apiSecret not set — skipping signature generation. Public endpoints will still work.\");",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://sapi.zebpay.com"
+    },
+    {
+      "key": "futuresBaseUrl",
+      "value": "https://futuresbe.zebpay.com"
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    },
+    {
+      "key": "apiSecret",
+      "value": ""
+    },
+    {
+      "key": "symbol",
+      "value": "BTC-INR"
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ]
+}
